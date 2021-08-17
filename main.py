@@ -10,7 +10,7 @@ import numpy as np
 import dash_table
 from data_cleasing import cleaser
 from utils.callback_manager import update_main_hist, update_box_plot,\
-    update_correlation_heatmap, hist_range
+    update_correlation_heatmap #, hist_range
 from utils.data import DataSet
 from utils import html_manager
 from utils import df_table_manager

@@ -1,6 +1,7 @@
-import plotly.graph_objs as go
+import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+from data_cleasing import cleaser
 
 
 def update_main_hist(bins, data_set):
@@ -27,13 +28,28 @@ def update_main_hist(bins, data_set):
 
 
 def update_box_plot(data_set):
-    temp_ = pd.DataFrame()
-    temp_["q"] = data_set.data[data_set.column]
-    temp_["w"] = data_set.data[data_set.column]
-    temp_["e"] = data_set.data[data_set.column]
-    print(temp_)
 
-    return px.box(temp_)
+    df = pd.DataFrame()
+    df = data_set.data[data_set.column]
+    original_list = df.values.tolist()
+    iqr_list = cleaser.IQR_outliners(df)
+    zscore_list = cleaser.zscore_outliners(df)
+
+    dc = {'Original': original_list, 'IQR': iqr_list, 'Z-Score': zscore_list}
+    df_new = pd.DataFrame.from_dict(dc, orient='index')
+    df_new = df_new.transpose()
+
+    fig = go.Figure()
+
+    fig.update_layout(
+        title="Filtering from outliners",
+        yaxis_title="column value",
+    )
+
+    for col in df_new:
+        fig.add_trace(go.Box(y=df_new[col].values, name=df_new[col].name))
+
+    return fig
 
 
 def update_correlation_heatmap(data_set):

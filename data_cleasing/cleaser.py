@@ -3,6 +3,37 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 
 
+def IQR_outliners(df):
+    Q = df.quantile([0.25, 0.75])
+    iqr = Q.values[1] - Q.values[0]
+    lower_inner_fence = Q.values[0] - (iqr * 1.5)
+    lower_outer_fence = Q.values[0] - (iqr * 3)
+    upper_inner_fence = Q.values[1] + (iqr * 1.5)
+    upper_outer_fence = Q.values[1] + (iqr * 3)
+    df = df[(lower_outer_fence <= df) & (df <= upper_outer_fence)]
+
+    return df.values.tolist()
+
+
+def zscore_outliners(df):
+    #name = df.name
+    mean = df.mean()
+    #print(type(mean.values[0]))
+    std = df.std()
+    #print(std.values[0])
+    filtered_list = []
+
+    for x in df:
+        print("LOOOOOOOOOOOOP******************")
+        print(df)
+        zscore = (x - mean) / std
+        if -3 <= zscore <= 3:
+            filtered_list.append(x)
+
+    #df_new = pd.DataFrame(filtered_list)
+
+    return filtered_list
+
 def outliers_detection(df):
     _df = df.copy()
     _df.dropna(inplace=True)
