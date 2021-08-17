@@ -1,0 +1,66 @@
+.banner {
+    height: 48px;
+    margin: 50px;
+    background-color: rgb(125, 125, 125);
+    border-radius: 2px;
+}
+
+.banner h2{
+    color: black;
+    padding-top: 7px;
+    margin-left: 2%;
+    display: inline-block;
+}
+
+.banner Img{
+    position: relative;
+    float: left;
+    left: 0px;
+    height: 50px;
+}
+
+
+body {
+background: rgb(255,255,255);
+background: linear-gradient(90deg, rgba(255,255,255,1) 16%, rgba(250,250,250,1) 38%, rgba(210,177,245,1) 100%);
+}
+
+
+.block {
+    height: 550px;
+    width: 50%;
+    background-color: rgba(240,240,240, 0.35);
+    border-radius: 25px;
+}
+
+
+
+.block-long {
+    height: 1120px;
+    width: 900px;
+    background-color: rgba(240,240,240, 0.35);
+    border-radius: 25px;
+    padding-left: 25px;
+    padding-top: 25px;
+}
+
+.block-wide {
+    height: 550px;
+    width: 1890px;
+    background-color: #b3e9ff;
+    border-radius: 25px;
+}
+
+.what-we-do{
+    background-image: url(http://idealogic.pl/assets/img/shape/what_do.png);
+    position: absolute;
+    content: "";
+    top: 50%;
+    z-index: 1;
+    background-repeat: no-repeat;
+    left: 0px;
+    max-width: 243px;
+    max-height: 482px;
+    width: 243px;
+    height: 482px;
+}
