@@ -48,7 +48,6 @@ class DataSet:
     @staticmethod
     def create_describe_table(dat, colm):
         column_description = pd.DataFrame()
-        print(dat[colm].describe())
         column_description["count"] = [dat[colm].describe()[0]]
         try:
             column_description["mean"] = [dat[colm].describe()[1]]

@@ -10,7 +10,7 @@ import numpy as np
 import dash_table
 from data_cleasing import cleaser
 from utils.callback_manager import update_main_hist, update_box_plot,\
-    update_correlation_heatmap, hist_range
+    update_correlation_heatmap, get_slider_range
 from utils.data import DataSet
 from utils import html_manager
 from utils import df_table_manager
@@ -79,10 +79,13 @@ def read(n):
     return [{'label': opt, 'value': opt} for opt in html_manager.column_options]
 
 
-
-
 @app.callback(
     Output("main-hist-cols", "figure"),
+    Output("range-slider", "min"),
+    Output("range-slider", "max"),
+    Output("range-slider", "marks"),
+    Output("range-slider", "value"),
+    Output("range-slider", "step"),
     [Input('columns-dropdown', 'value'),
      Input('bins-slider', 'value'),
      Input('range-slider',  'value'),
@@ -99,9 +102,10 @@ def update_fig(column, bins, val_range, _, __, table_selected_column, n):
         data_set.column = table_selected_column[0]
     if trigger == "columns-dropdown.value":
         data_set.column = column
-    if trigger == "range-slider.value":
+    if trigger == "range-slider.value" or trigger == "bins-slider.value" or '.':
         data_set.range = val_range
-    return update_main_hist(bins, data_set)
+        return [update_main_hist(bins, data_set)] + list(get_slider_range(data_set, 2))
+    return [update_main_hist(bins, data_set)] + list(get_slider_range(data_set, 1))
 
 
 @app.callback(
