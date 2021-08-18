@@ -36,6 +36,8 @@ text_box_sep = html.Div([
                             dbc.Button('set', id='set-sep', color="light", className="b-1")
                         ] + [html.Div(id="out-sep")], style={"margin-left": "5%", "float": "left"})
 
+text_box_range = html.Div([html.Div(id="range-output")], style={"margin-left": "40%"})
+
 ### FIGURES
 main_histogram = html.Div([
     dcc.Graph(id='main-hist-cols')], style={'width': '90%', "margin": "5%"})
@@ -64,6 +66,7 @@ main_hist_sliders = html.Div([
             step=0.5,
             value=[5, 15]
         ),
+        text_box_range
     ], style={'width': '100%', 'font-color': '#bd0b23', 'margin-top': '1%', 'display': "inline-block"})
 ], style={'width': '50%', "margin-right": "5%", 'font-style': 'normal',
           'display': "inline-block", 'float': 'right'})

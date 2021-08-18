@@ -58,9 +58,15 @@ app.layout = html.Div([
     html.Div([
         html_manager.box_graph,
     ], className="block", style={'float': 'right', "margin": "25px"}, ),
+
+    # LEFT BOTTOM CONTAINER
     html.Div([
         html_manager.correlation_heatmap,
     ], className="block", style={'float': 'left', "margin": "25px"}, ),
+
+    # RIGHT BOTTOM CONTAINER
+    html.Div([
+    ], className="block", style={'float': 'right', "margin": "25px", "width" : "40%"}, ),
 
 ])
 
@@ -86,6 +92,7 @@ def read(n):
     Output("range-slider", "marks"),
     Output("range-slider", "value"),
     Output("range-slider", "step"),
+    Output("range-output", "children"),
     [Input('columns-dropdown', 'value'),
      Input('bins-slider', 'value'),
      Input('range-slider',  'value'),
@@ -102,10 +109,14 @@ def update_fig(column, bins, val_range, _, __, table_selected_column, n):
         data_set.column = table_selected_column[0]
     if trigger == "columns-dropdown.value":
         data_set.column = column
-    if trigger == "range-slider.value" or trigger == "bins-slider.value" or '.':
+    if trigger == "range-slider.value" or trigger == "bins-slider.value":
         data_set.range = val_range
-        return [update_main_hist(bins, data_set)] + list(get_slider_range(data_set, 2))
-    return [update_main_hist(bins, data_set)] + list(get_slider_range(data_set, 1))
+        label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
+        return [update_main_hist(bins, data_set)] + list(get_slider_range(data_set, 2)) + label_output
+    range_list = list(get_slider_range(data_set, 1))
+    data_set.range = range_list[0:2]
+    label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
+    return [update_main_hist(bins, data_set)] + range_list + label_output
 
 
 @app.callback(
@@ -158,11 +169,12 @@ def set_sep(plus):
 @app.callback(
     Output("box-graph", "figure"),
     [Input('columns-dropdown', 'value'),
+     Input('range-slider', 'value'),
      Input('datatable-interactivity', "derived_virtual_data"),
      Input('datatable-interactivity', "derived_virtual_selected_rows"),
      Input('datatable-interactivity', 'selected_columns'),
      Input('read', 'n_clicks')])
-def box_graph(column, rows, derived_virtual_selected_rows, table_selected_column,n):
+def box_graph(column, range, rows, derived_virtual_selected_rows, table_selected_column, n):
     global data_set
     trigger = dash.callback_context.triggered[0]["prop_id"]
     if trigger == "datatable-interactivity.selected_columns":

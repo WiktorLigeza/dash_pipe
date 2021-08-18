@@ -1,6 +1,8 @@
 import plotly.graph_objs as go
 import plotly.express as px
 import pandas as pd
+inter = 0
+from data_cleasing import cleaser
 
 
 def update_main_hist(bins, data_set):
@@ -28,12 +30,24 @@ def update_main_hist(bins, data_set):
 
 
 def update_box_plot(data_set):
-    temp_ = pd.DataFrame()
-    temp_["q"] = data_set.data[data_set.column]
-    temp_["w"] = data_set.data[data_set.column]
-    temp_["e"] = data_set.data[data_set.column]
-
-    return px.box(temp_)
+    global inter
+    inter  += 1
+    print(data_set.range, inter)
+    df = get_x(data_set, data_set.data[data_set.column])
+    original_list = df.values.tolist()
+    iqr_list = cleaser.IQR_outliers(df)
+    zscore_list = cleaser.zscore_outliers(df)
+    dc = {'Original': original_list, 'IQR': iqr_list, 'Z-Score': zscore_list}
+    df_new = pd.DataFrame.from_dict(dc, orient='index')
+    df_new = df_new.transpose()
+    fig = go.Figure()
+    fig.update_layout(
+        title="Filtering from outliners",
+        yaxis_title="column value",
+    )
+    for col in df_new:
+        fig.add_trace(go.Box(y=df_new[col].values, name=df_new[col].name))
+    return fig
 
 
 def update_correlation_heatmap(data_set):
@@ -53,10 +67,12 @@ def update_correlation_heatmap(data_set):
 
 
 def get_slider_range(data_set, type_=1):
-    max_ = data_set.modified_data[data_set.column].max()
-    min_ = data_set.modified_data[data_set.column].min()
+    if str(type(data_set.modified_data[data_set.column].max())) == "<class 'pandas.core.series.Series'>":
+        data_set.column = data_set.data.columns[0]
+    max_ = float(round(data_set.modified_data[data_set.column].max(), 2))
+    min_ = float(round(data_set.modified_data[data_set.column].min(), 2))
     marks_ = {i: '{}'.format(i) for i in [min_, round(((max_+min_)/2), 2), max_]}
-    step_ = (max_-min_)/100
+    step_ = float((max_-min_)/100)
 
     if type_ == 1:
         value_ = [min_, max_]
@@ -67,7 +83,7 @@ def get_slider_range(data_set, type_=1):
 
 
 def get_x(data_set, datum):
-    check_x(data_set)
+    #check_x(data_set)
     try:
         temp = datum[datum >= data_set.range[0]]
         return temp[temp <= data_set.range[1]]
@@ -80,5 +96,4 @@ def check_x(data_set):
     min_ = data_set.modified_data[data_set.column].min()
     if data_set.range is None:
         data_set.range = [min_, max_]
-        print("dddoopsko", data_set.range)
 
