@@ -36,7 +36,7 @@ text_box_sep = html.Div([
                             dbc.Button('set', id='set-sep', color="light", className="b-1")
                         ] + [html.Div(id="out-sep")], style={"margin-left": "5%", "float": "left"})
 
-text_box_range = html.Div([html.Div(id="range-output")], style={"margin-left": "40%"})
+text_box_range = html.Div([html.Div(id="range-output")], style={"margin-left": "40%", "font-size": "small"})
 
 ### FIGURES
 main_histogram = html.Div([
@@ -48,6 +48,12 @@ box_graph = html.Div([
 
 ### DROP DOWNS
 columns_dropdown = None
+
+
+save_button = html.Div([
+    html.Button('save', id='save-modified-button', n_clicks=0)],
+    style={"margin-right": "5%", "margin-top": "0%", 'float': 'right'})
+
 
 ### SLIDERS
 main_hist_sliders = html.Div([
@@ -107,6 +113,11 @@ message_box = html.Div([
 
 correlation_heatmap = html.Div([
     dcc.Graph(id='correlation-heatmap')], style={'width': '90%', "margin": "5%"})
+
+
+nans_pie = html.Div([
+    dcc.Graph(id='nans-pie')], style={'width': '90%', "margin-left": "5%", "margin-right": "5%", "margin-top": "5%"})
+
 
 
 def activate_dropdown():

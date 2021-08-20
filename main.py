@@ -9,16 +9,18 @@ import pandas as pd
 import numpy as np
 import dash_table
 from data_cleasing import cleaser
-from utils.callback_manager import update_main_hist, update_box_plot,\
-    update_correlation_heatmap, get_slider_range
+from utils.callback_manager import update_main_hist, update_box_plot, \
+    update_correlation_heatmap, get_slider_range, save_modified, get_NaNs_pie
 from utils.data import DataSet
 from utils import html_manager
 from utils import df_table_manager
 
-app = dash.Dash(__name__)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 data_set = DataSet()
 data_set.path = "data\\data.csv"
+init_path = "data\\data.csv"
 data_set.get_data()
 data = data_set.data
 html_manager.column_options = data_set.columns
@@ -40,16 +42,17 @@ app.layout = html.Div([
     html.Div([
         html_manager.text_box_path,
         html_manager.text_box_sep,
+        html_manager.save_button,
         html_manager.data_set_radio_buttons,
         html_manager.description_table,
         html_manager.main_histogram,
         html_manager.columns_dropdown,
-        html_manager.main_hist_sliders
-
+        html_manager.main_hist_sliders,
     ], className="block-long", style={'float': 'left', 'width': "35%", "margin": "25px"}),
     html.Div(id='hidden-div-1', style={'display': 'none'}),
     html.Div(id='hidden-div-2', style={'display': 'none'}),
     html.Div(id='hidden-div-3', style={'display': 'none'}),
+    html.Div(id='hidden-div-4', style={'display': 'none'}),
 
     # RIGHT CONTAINER
     html.Div([
@@ -66,7 +69,9 @@ app.layout = html.Div([
 
     # RIGHT BOTTOM CONTAINER
     html.Div([
-    ], className="block", style={'float': 'right', "margin": "25px", "width" : "40%"}, ),
+        html_manager.nans_pie,
+
+    ], className="block", style={'float': 'right', "margin": "25px", "width": "40%"}, ),
 
 ])
 
@@ -87,6 +92,7 @@ def read(n):
 
 @app.callback(
     Output("main-hist-cols", "figure"),
+    Output("nans-pie", "figure"),
     Output("range-slider", "min"),
     Output("range-slider", "max"),
     Output("range-slider", "marks"),
@@ -95,7 +101,7 @@ def read(n):
     Output("range-output", "children"),
     [Input('columns-dropdown', 'value'),
      Input('bins-slider', 'value'),
-     Input('range-slider',  'value'),
+     Input('range-slider', 'value'),
      Input('datatable-interactivity', "derived_virtual_data"),
      Input('datatable-interactivity', "derived_virtual_selected_rows"),
      Input('datatable-interactivity', 'selected_columns'),
@@ -103,7 +109,6 @@ def read(n):
      ])
 def update_fig(column, bins, val_range, _, __, table_selected_column, n):
     global data, range_slider, data_set
-    print("using: {}".format(data_set.data_type))
     trigger = dash.callback_context.triggered[0]["prop_id"]
     if trigger == "datatable-interactivity.selected_columns":
         data_set.column = table_selected_column[0]
@@ -112,11 +117,16 @@ def update_fig(column, bins, val_range, _, __, table_selected_column, n):
     if trigger == "range-slider.value" or trigger == "bins-slider.value":
         data_set.range = val_range
         label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
-        return [update_main_hist(bins, data_set)] + list(get_slider_range(data_set, 2)) + label_output
+        print(data_set.column)
+        return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + \
+               list(get_slider_range(data_set, 2)) + label_output
+    print("cipeczka 1 ", data_set.column)
     range_list = list(get_slider_range(data_set, 1))
     data_set.range = range_list[0:2]
     label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
-    return [update_main_hist(bins, data_set)] + range_list + label_output
+    print("cipeczka 2 ", data_set.column)
+    return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + \
+           range_list + label_output
 
 
 @app.callback(
@@ -178,7 +188,13 @@ def box_graph(column, range, rows, derived_virtual_selected_rows, table_selected
     global data_set
     trigger = dash.callback_context.triggered[0]["prop_id"]
     if trigger == "datatable-interactivity.selected_columns":
-        data_set.column = table_selected_column[0]
+        if len(table_selected_column) > 0:
+            data_set.column = table_selected_column[0]
+        else:
+            if data_set.data_type == "modified-radio":
+                data_set.column = data_set.modified_data.columns[0]
+            else:
+                data_set.column = data_set.data.columns[0]
     else:
         data_set.column = column
     return update_box_plot(data_set)
@@ -198,7 +214,7 @@ def update_styles(selected_columns):
     Input('datatable-interactivity', "derived_virtual_data"),
     Input('datatable-interactivity', "derived_virtual_selected_rows"),
     Input('read', 'n_clicks'))
-def update_table(rows, derived_virtual_selected_rows,n):
+def update_table(rows, derived_virtual_selected_rows, n):
     global data_set
     trigger = dash.callback_context.triggered[0]["prop_id"]
     if trigger == "datatable-interactivity.derived_virtual_data":
@@ -223,7 +239,7 @@ def update_data(value, n):
         val = data_set.data.to_dict('records')
     else:
         data_set.modified_data = data_set.display_data.copy(deep=True)
-        columns = [{'name': col, 'id': col,  "deletable": True, "selectable": True} for col in
+        columns = [{'name': col, 'id': col, "deletable": True, "selectable": True} for col in
                    data_set.modified_data.columns]
         val = data_set.modified_data.to_dict('records')
 
@@ -237,6 +253,21 @@ def update_data(value, n):
 def update_fig(value, n):
     global data_set
     return update_correlation_heatmap(data_set)
+
+
+@app.callback(
+    Output('hidden-div-4', "children"),
+    [Input('save-modified-button', "n_clicks")],
+)
+def save(n):
+    global data_set
+    if n == 0:
+        print("init")
+    else:
+        print("save: {}".format(n))
+        data_set.path = init_path
+        save_modified(data_set, n)
+    raise dash.exceptions.PreventUpdate("cancel the callback")
 
 
 if __name__ == "__main__":

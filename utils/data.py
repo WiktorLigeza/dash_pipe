@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 class DataSet:
     def __init__(self):
         self.data = pd.DataFrame()
