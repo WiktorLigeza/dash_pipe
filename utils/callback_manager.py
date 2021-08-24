@@ -136,12 +136,17 @@ def plot_pca_tsne(df, target, switch=0, origin=None):
                                            z=df['principal component 3'],
                                            mode='markers',
                                            marker=dict(
-                                               size=12,
+                                               size=8,
                                                color=origin[target],  # set color to an array/list of desired values
                                                # colorscale='Viridis',   # choose a colorscale
-                                               opacity=0.8
                                            )
                                            )])
+        fig.update_layout(
+            title_text="T-SNE after PCA method",
+            autosize=False,
+            width=800,
+            height=800,
+        )
         print(type(fig))
         return fig
     else:
@@ -152,9 +157,14 @@ def plot_pca_tsne(df, target, switch=0, origin=None):
                                                size=8,
                                                color=df[target],  # set color to an array/list of desired values
                                                # colorscale='Viridis',   # choose a colorscale
-                                               opacity=0.8
                                            )
                                            )])
+        fig.update_layout(
+            title_text="T-SNE after PCA method",
+            autosize=False,
+            width=800,
+            height=800,
+        )
         print(type(fig))
         return fig
 
