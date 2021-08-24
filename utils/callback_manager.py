@@ -128,3 +128,42 @@ def get_NaNs_pie(data_set):
                                                                      data_set.range[0], data_set.range[1]))
 
     return fig
+
+
+def plot_pca_tsne(df, target, switch=0, origin=None):
+    if switch == 1:
+        fig = go.Figure(data=[go.Scatter3d(x=df['principal component 1'], y=df['principal component 2'],
+                                           z=df['principal component 3'],
+                                           mode='markers',
+                                           marker=dict(
+                                               size=12,
+                                               color=origin[target],  # set color to an array/list of desired values
+                                               # colorscale='Viridis',   # choose a colorscale
+                                               opacity=0.8
+                                           )
+                                           )])
+        print(type(fig))
+        return fig
+    else:
+        fig = go.Figure(data=[go.Scatter3d(x=df['principal component 1'], y=df['principal component 2'],
+                                           z=df['principal component 3'],
+                                           mode='markers',
+                                           marker=dict(
+                                               size=8,
+                                               color=df[target],  # set color to an array/list of desired values
+                                               # colorscale='Viridis',   # choose a colorscale
+                                               opacity=0.8
+                                           )
+                                           )])
+        print(type(fig))
+        return fig
+
+col_list_ex = ['density.$id', 'density.id', 'density.thicknessId', 'cappedUncapped', 'supportType', 'supportDensityId']
+
+def pca_control(dataset, target = 'Y_type'):
+    col_list_ex = ['density.$id', 'density.id', 'density.thicknessId', 'cappedUncapped', 'supportType',
+                   'supportDensityId']
+    df_copy = dataset.data.copy()
+    cleaned, before_tsne = cleaser.clean_df(col_list_ex, df_copy, target)
+    fig = plot_pca_tsne(cleaned, target, 1, before_tsne)
+    return fig

@@ -118,6 +118,9 @@ correlation_heatmap = html.Div([
 nans_pie = html.Div([
     dcc.Graph(id='nans-pie')], style={'width': '90%', "margin-left": "5%", "margin-right": "5%", "margin-top": "5%"})
 
+tsne_pca = html.Div([
+    dcc.Graph(id='tsne_pca')], style={'width': '90%', "margin-left": "5%", "margin-right": "5%", "margin-top": "5%"})
+
 
 
 def activate_dropdown():

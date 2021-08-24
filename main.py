@@ -10,7 +10,7 @@ import numpy as np
 import dash_table
 from data_cleasing import cleaser
 from utils.callback_manager import update_main_hist, update_box_plot, \
-    update_correlation_heatmap, get_slider_range, save_modified, get_NaNs_pie
+    update_correlation_heatmap, get_slider_range, save_modified, get_NaNs_pie, pca_control
 from utils.data import DataSet
 from utils import html_manager
 from utils import df_table_manager
@@ -67,6 +67,10 @@ app.layout = html.Div([
         html_manager.correlation_heatmap,
     ], className="block", style={'float': 'left', "margin": "25px"}, ),
 
+    html.Div([
+        html_manager.tsne_pca,
+    ], className="block", style={'float': 'left', "margin": "25px"}, ),
+
     # RIGHT BOTTOM CONTAINER
     html.Div([
         html_manager.nans_pie,
@@ -93,6 +97,7 @@ def read(n):
 @app.callback(
     Output("main-hist-cols", "figure"),
     Output("nans-pie", "figure"),
+    Output("tsne_pca", "figure"),
     Output("range-slider", "min"),
     Output("range-slider", "max"),
     Output("range-slider", "marks"),
@@ -118,14 +123,14 @@ def update_fig(column, bins, val_range, _, __, table_selected_column, n):
         data_set.range = val_range
         label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
         print(data_set.column)
-        return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + \
+        return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + [pca_control(data_set)] + \
                list(get_slider_range(data_set, 2)) + label_output
     print("cipeczka 1 ", data_set.column)
     range_list = list(get_slider_range(data_set, 1))
     data_set.range = range_list[0:2]
     label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
     print("cipeczka 2 ", data_set.column)
-    return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + \
+    return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + [pca_control(data_set)] + \
            range_list + label_output
 
 
