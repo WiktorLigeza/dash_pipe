@@ -2,6 +2,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 import pandas as pd
 from data_cleasing import cleaser
+import numpy as np
 
 inter = 0
 
@@ -143,9 +144,9 @@ def plot_pca_tsne(df, target, switch=0, origin=None):
                                            )])
         fig.update_layout(
             title_text="T-SNE after PCA method",
-            autosize=False,
-            width=800,
-            height=800,
+            # autosize=False,
+            # width=800,
+            # height=800,
         )
         print(type(fig))
         return fig
@@ -161,9 +162,9 @@ def plot_pca_tsne(df, target, switch=0, origin=None):
                                            )])
         fig.update_layout(
             title_text="T-SNE after PCA method",
-            autosize=False,
-            width=800,
-            height=800,
+            # autosize=False,
+            # width=800,
+            # height=800,
         )
         print(type(fig))
         return fig
@@ -176,4 +177,38 @@ def pca_control(dataset, target = 'Y_type'):
     df_copy = dataset.data.copy()
     cleaned, before_tsne = cleaser.clean_df(col_list_ex, df_copy, target)
     fig = plot_pca_tsne(cleaned, target, 1, before_tsne)
+    return fig
+
+
+def rec_plot(reconstruction_error, th = 0.33):
+    fig = go.Figure(data=go.Scatter(
+        y=reconstruction_error.values,
+        mode='markers',
+        marker=dict(
+            size=12,
+            color=reconstruction_error.values,  # set color equal to a variable
+            colorscale='Viridis',  # one of plotly colorscales
+            showscale=True
+        )
+    ))
+
+    fig.update_layout(
+        title_text="Reconstruction error",
+    )
+    fig.add_hline(y=th, line_color='red')
+    fig.add_hrect(y0=th, y1=1.1, line_width=0, fillcolor="red", opacity=0.2)
+
+    return fig
+
+def rec_control(dataset, th = 0.33, target = 'Y_type'):
+    col_list_ex = ['density.$id', 'density.id', 'density.thicknessId', 'cappedUncapped', 'supportType', 'supportDensityId']
+    df_copy = dataset.data.copy()
+    df_reduced, pca, df_inverse_pca, df_copy = cleaser.clean_df_rec(col_list_ex, df_copy, target)
+    print("_______________________________________________________________")
+    print(df_copy)
+    print("_______________________________________________________________")
+    print(df_inverse_pca)
+    reconstruction_error = cleaser.reconstruction_score(df_copy, df_inverse_pca)
+    fig = rec_plot(reconstruction_error, th)
+
     return fig

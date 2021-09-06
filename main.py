@@ -10,7 +10,7 @@ import numpy as np
 import dash_table
 from data_cleasing import cleaser
 from utils.callback_manager import update_main_hist, update_box_plot, \
-    update_correlation_heatmap, get_slider_range, save_modified, get_NaNs_pie, pca_control
+    update_correlation_heatmap, get_slider_range, save_modified, get_NaNs_pie, pca_control, rec_control
 from utils.data import DataSet
 from utils import html_manager
 from utils import df_table_manager
@@ -65,7 +65,7 @@ app.layout = html.Div([
     # LEFT BOTTOM CONTAINER
     html.Div([
         html_manager.correlation_heatmap,
-    ], className="block", style={'float': 'left', "margin": "25px"}, ),
+    ], className="block", style={'width': '40%', 'float': 'left', "margin": "25px"}, ),
 
     html.Div([
         html_manager.tsne_pca,
@@ -76,6 +76,17 @@ app.layout = html.Div([
         html_manager.nans_pie,
 
     ], className="block", style={'float': 'right', "margin": "25px", "width": "40%"}, ),
+
+    html.Div([
+        html_manager.th_slider,
+        html_manager.rec_err,
+
+    ], className="block", style={'float': 'right', "margin": "25px", "width": "40%"}, ),
+
+    # html.Div([
+    #     html_manager.th_slider,
+    #
+    # ], className="block", style={'float': 'right', "margin": "25px", "width": "40%"}, ),
 
 ])
 
@@ -98,6 +109,7 @@ def read(n):
     Output("main-hist-cols", "figure"),
     Output("nans-pie", "figure"),
     Output("tsne_pca", "figure"),
+    Output("rec_err", "figure"),
     Output("range-slider", "min"),
     Output("range-slider", "max"),
     Output("range-slider", "marks"),
@@ -110,27 +122,29 @@ def read(n):
      Input('datatable-interactivity', "derived_virtual_data"),
      Input('datatable-interactivity', "derived_virtual_selected_rows"),
      Input('datatable-interactivity', 'selected_columns'),
-     Input('read', 'n_clicks')
+     Input('read', 'n_clicks'),
+     Input('th_slider', 'value')
      ])
-def update_fig(column, bins, val_range, _, __, table_selected_column, n):
+def update_fig(column, bins, val_range, _, __, table_selected_column, n, th):
     global data, range_slider, data_set
+    print("TH: ", th)
     trigger = dash.callback_context.triggered[0]["prop_id"]
     if trigger == "datatable-interactivity.selected_columns":
         data_set.column = table_selected_column[0]
     if trigger == "columns-dropdown.value":
         data_set.column = column
-    if trigger == "range-slider.value" or trigger == "bins-slider.value":
+    if trigger == "range-slider.value" or trigger == "bins-slider.value" or trigger == "th_slider.value":
         data_set.range = val_range
         label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
         print(data_set.column)
-        return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + [pca_control(data_set)] + \
+        return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + [pca_control(data_set)] + [rec_control(data_set, th)] + \
                list(get_slider_range(data_set, 2)) + label_output
     print("cipeczka 1 ", data_set.column)
     range_list = list(get_slider_range(data_set, 1))
     data_set.range = range_list[0:2]
     label_output = ["< {} : {} >".format(data_set.range[0], data_set.range[1])]
     print("cipeczka 2 ", data_set.column)
-    return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + [pca_control(data_set)] + \
+    return [update_main_hist(bins, data_set)] + [get_NaNs_pie(data_set)] + [pca_control(data_set)] + [rec_control(data_set, th)] + \
            range_list + label_output
 
 

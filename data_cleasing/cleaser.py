@@ -102,11 +102,20 @@ def pca_preproc(df, features, target):
     df = pd.concat([principalDf, df[target]], axis = 1)
     return df
 
+X_embedded = None
+counter = 0
+
 def t_sne(df):
-    X_embedded = TSNE(n_components=3).fit_transform(df)
+    global X_embedded, counter
+
+    if counter == 0:
+        X_embedded = TSNE(n_components=3).fit_transform(df)
+        counter = -1
+
     X_embedded_df = pd.DataFrame(data = X_embedded
              , columns = ['principal component 1', 'principal component 2', 'principal component 3'])
     return X_embedded_df
+
 
 def clean_df(col_list, dataframe, target):
     df = drop_cols_from_list(col_list, dataframe)
@@ -114,4 +123,33 @@ def clean_df(col_list, dataframe, target):
     df = pca_preproc(df, features, target)
     tsne_df = t_sne(df)
     return tsne_df, df
+
+
+# to rebuild (merge with pca_preproc above)
+def reconstruction_score(original_data, reconstructed_data, normalized=True):
+    loss = np.sum((np.array(original_data)-np.array(reconstructed_data))**2, axis=1)
+    if normalized==True:
+        loss = (loss-np.min(loss))/(np.max(loss)-np.min(loss))
+    loss = pd.Series(data=loss,index=original_data.index)
+    return loss
+
+
+def pca_preproc_rec(df, features, target):
+    df_copy = df.copy()
+    std = StandardScaler()
+    pca = PCA(n_components=3)
+
+    df_reduced = pd.DataFrame(pca.fit_transform(std.fit_transform(df_copy)), index=df_copy.index)
+    df_inverse_pca = pd.DataFrame(pca.inverse_transform(df_reduced), columns=df.columns, index=df.index)
+    df_inversed = pd.DataFrame(std.inverse_transform(df_inverse_pca), columns=df_inverse_pca.columns,
+                               index=df_inverse_pca.index)
+
+    return df_reduced, pca, df_inversed, df_copy
+
+
+def clean_df_rec(col_list, dataframe, target):
+    df = drop_cols_from_list(col_list, dataframe)
+    features = df.columns.to_list()
+    df_reduced, pca, df_inverse_pca, df_copy = pca_preproc_rec(df, features, target)
+    return df_reduced, pca, df_inverse_pca, df_copy
 

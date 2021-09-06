@@ -121,6 +121,17 @@ nans_pie = html.Div([
 tsne_pca = html.Div([
     dcc.Graph(id='tsne_pca')], style={'width': '90%', "margin-left": "5%", "margin-right": "5%", "margin-top": "5%"})
 
+rec_err = html.Div([
+    dcc.Graph(id='rec_err')], style={'width': '90%', "margin-left": "5%", "margin-right": "5%", "margin-top": "5%"})
+
+th_slider = html.Div([
+        dcc.Slider(
+            id='th_slider',
+            min=0,
+            max=1,
+            step=0.1,
+            value=0.33)], style={'width': '90%', "margin-left": "5%", "margin-right": "5%", "margin-top": "5%"})
+
 
 
 def activate_dropdown():
